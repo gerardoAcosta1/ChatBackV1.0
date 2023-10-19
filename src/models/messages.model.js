@@ -1,5 +1,5 @@
 import { DataTypes } from 'sequelize';
-import db from '../utils/database.js';
+import { db } from '../utils/database.js';
 
 const Message = db.define('Messages', {
   id: {
@@ -20,10 +20,10 @@ const Message = db.define('Messages', {
     allowNull: false,
   },
 }, {
-  tableName: 'Messages', 
+  tableName: 'Messages',
   timestamps: true,
   createdAt: true,
-  updatedAt:false 
+  updatedAt: false
 });
 
 

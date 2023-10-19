@@ -1,15 +1,9 @@
 import express from 'express';
 import cors from 'cors';
-import db from './utils/database.js';
+import {initializeDatabase} from './utils/database.js';
 import apiV1Routes from './routes/apiv1.routes.js';
 
-
-db.authenticate()
-    .then(res => console.log(res))
-    .catch(err => console.log(err))
-db.sync()
-    .then(res => console.log('conected to database'))
-    .catch(err => console.log(err))
+initializeDatabase();
 
 const app = express();
 

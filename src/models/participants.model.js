@@ -1,5 +1,5 @@
 import { DataTypes } from "sequelize";
-import db from "../utils/database.js";
+import { db } from "../utils/database.js";
 
 const Participant = db.define('Participants', {
 
@@ -18,10 +18,10 @@ const Participant = db.define('Participants', {
         allowNull: false
     },
 }, {
-    tableName: 'Participants', 
+    tableName: 'Participants',
     timestamps: true,
     createdAt: true,
-    updatedAt:false 
+    updatedAt: false
 });
 
-export {Participant};
+export { Participant };

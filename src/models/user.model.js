@@ -1,6 +1,6 @@
 import { DataTypes } from "sequelize";
-import db from "../utils/database.js";
-
+import { db } from "../utils/database.js";
+import bcrypt from 'bcrypt'
 const User = db.define('Users', {
 
     id: {
@@ -18,11 +18,17 @@ const User = db.define('Users', {
         allowNull: false
     },
 }, {
-    tableName: 'Users', 
+    tableName: 'Users',
     timestamps: true,
     createdAt: true,
-    updatedAt:false 
+    updatedAt: false,
+    hooks: {
+        beforeCreate: async (user, options) => {
+            const hashed = await bcrypt.hash(user.password, 10);
+            user.password = hashed;
+        }
+    }
 });
 
 
-export {User};
+export { User };

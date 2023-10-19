@@ -11,7 +11,19 @@ const db = new Sequelize(process.env.DATABASE_URL, {
   },
 });
 
-export default db
+async function initializeDatabase() {
+  try {
+    await db.authenticate();
+    await db.sync();
+    console.log('Connected to the database and synchronized models.');
+  } catch (error) {
+    console.error('Database connection error:', error);
+  }
+}
+export {
+  initializeDatabase,
+  db
+}
 
 /*
 
