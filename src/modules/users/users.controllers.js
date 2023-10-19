@@ -33,6 +33,7 @@ const addNewUser = async (req, res) => {
         res.status(200).json(user);
 
     } catch (error) {
+        console.log(error)
         res.status(409).json({error: 'error en la base creando al usuario'})
     }
 }
