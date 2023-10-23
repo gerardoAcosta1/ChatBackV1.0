@@ -28,12 +28,13 @@ const addNewUser = async (req, res) => {
 
         if(userExist){
             res.json('el usuario ya existe')
+        }else{
+            const user = await User.create(newUser)
+        
+            res.status(200).json(user);
         }
 
-        const user = await User.create(newUser)
-        
-        res.status(200).json(user);
-
+    
     } catch (error) {
         console.log(error)
         res.status(409).json({error: 'error en la base creando al usuario'})
@@ -49,13 +50,13 @@ const loginUser = async (req, res) => {
         const user = await User.findOne({
             where: {username}
         })
-
+        console.log(user)
         if(!user){
             
             res.status(404).json({message: 'user not found'})
         }
 
-        const validPassword = await bcryp.compare(password, user.password);
+        const validPassword = await bcryp.compare(password, user?.password);
 
         if(!validPassword){
             res.status(300).json({message: 'error, la contraseña no coincide'})
