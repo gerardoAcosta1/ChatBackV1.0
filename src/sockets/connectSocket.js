@@ -8,7 +8,7 @@ const createConnections = (app) => {
 
     const io = new Server(server, {
         cors: {
-            origin: '*', 
+            origin: '*', // Reemplaza esto con el origen de tu aplicación web
             methods: ['GET', 'POST'],
         },
     });
@@ -16,10 +16,20 @@ const createConnections = (app) => {
     io.on("connection", (socket) => {
         console.log(`Cliente WebSocket conectado con ID: ${socket.id}`);
 
-        socket.on("joinConversation", (conversationId) => {
+        socket.on("joinConversation", (conversationId, username, userId) => {
 
             socket.join(conversationId); // Crea o únete a una sala por el ID de la conversación
-            console.log(`Cliente ${socket.id} se unió a la conversación ${conversationId}`);
+            console.log(`Cliente ${username} se unió a la conversación ${conversationId}`);
+
+            const notice = {
+                content: `${username} ahora está conectado a esta conversacion`,
+                Sender:'server',
+                SenderId:userId,
+                conversationId: conversationId,
+                connect: true,
+                type:'userConnected'
+            }
+            io.to(conversationId).emit('userConnected', notice );
         });
 
         socket.on('message', (data) => {
@@ -36,16 +46,25 @@ const createConnections = (app) => {
 
         socket.on('disconnecting', () => {
             // Abandonar todos los canales cuando el cliente se desconecta
+            
             for (const room of socket.rooms) {
                 if (room !== socket.id) {
                     socket.leave(room);
                     console.log(`Cliente ${socket.id} abandonó la conversación ${room}`);
+                    const notice = {
+                        content: ` se desconectó`,
+                        Sender: 'server',
+                        SenderId:1,
+                        conversationId: room,
+                        connect: false
+                    }
+                    io.to(room).emit('message', notice)
                 }
             }
         });
     });
 
-
+    return server
 }
 export default createConnections
 

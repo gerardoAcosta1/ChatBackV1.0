@@ -15,6 +15,10 @@ const Message = db.define('Messages', {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
+  Sender: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   content: {
     type: DataTypes.STRING,
     allowNull: false,

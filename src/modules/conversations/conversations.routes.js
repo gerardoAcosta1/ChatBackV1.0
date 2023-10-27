@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createConversationWithParticipants, deleteConversation, getAllConversations } from "./conversations.controllers.js";
+import { createConversationWithParticipants, createPrivateConversation, deleteConversation, getAllConversations } from "./conversations.controllers.js";
 import authenticate from "../../middlewares/auth.middleware.js";
 
 const router = Router();
@@ -9,6 +9,7 @@ router
     .get(authenticate, getAllConversations)
     .delete(authenticate, deleteConversation)
 
-router.post('/', authenticate, createConversationWithParticipants)
+router.post('/groups/', authenticate, createConversationWithParticipants)
+router.post('/private/', authenticate, createPrivateConversation)
 
 export default router

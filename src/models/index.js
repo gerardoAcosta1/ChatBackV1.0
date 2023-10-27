@@ -8,6 +8,8 @@ const defineModels = () => {
     Conversation.hasMany(Participant); // Una conversación puede tener varios participantes
     Participant.belongsTo(User);
     User.hasMany(Participant);
+   
+    User.hasMany(Message, {foreignKey: 'SenderId'})
     Message.belongsTo(Conversation, {
       foreignKey: 'ConversationId',
       onDelete: 'CASCADE',

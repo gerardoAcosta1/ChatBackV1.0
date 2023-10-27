@@ -1,14 +1,15 @@
 import defineModels from "../../models/index.js"
 import bcryp from 'bcrypt'
 import { signAuthToken } from "../../utils/singToken.js";
+import { Conversation } from "../../models/conversation.model.js";
 
 const { User } = defineModels();
 
 const getAllUsers = async (req, res) => {
 
     try {
-
-        const users = await User.findAll()
+       
+        const users = await User.findAll();
 
         res.status(200).json(users)
     } catch (error) {
@@ -42,40 +43,38 @@ const addNewUser = async (req, res) => {
 }
 
 const loginUser = async (req, res) => {
-
     try {
-        
-        const {username, password} = req.body
+        const { username, password } = req.body;
 
         const user = await User.findOne({
-            where: {username}
-        })
-        console.log(user)
-        if(!user){
-            
-            res.status(404).json({message: 'user not found'})
+            where: { username }
+        });
+
+        if (!user) {
+            console.log("Usuario no encontrado");
+            return res.status(404).json({ message: "Usuario no encontrado" });
         }
 
         const validPassword = await bcryp.compare(password, user?.password);
 
-        if(!validPassword){
-            res.status(300).json({message: 'error, la contraseña no coincide'})
+        if (!validPassword) {
+            console.log("Error: la contraseña no coincide");
+            return res.status(400).json({ message: "Error, la contraseña no coincide" });
         }
 
-        const copyUser = {...user.dataValues}
-        delete copyUser.password
+        const copyUser = { ...user.dataValues };
+        delete copyUser.password;
 
         const token = signAuthToken(copyUser);
         copyUser.token = token;
 
-        res.status(200).json(copyUser);
-
+        console.log("Usuario autenticado exitosamente");
+        return res.status(200).json(copyUser);
     } catch (error) {
-
-        console.log(error)
-        res.status(409).json({error: 'error validando al usuario'})
+        console.error(error);
+        res.status(500).json({ error: "Error validando al usuario" });
     }
-}
+};
 export {
     getAllUsers, 
     addNewUser,

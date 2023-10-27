@@ -1,7 +1,7 @@
 
 import defineModels from "../../models/index.js";
 
-const { Conversation, Message } = defineModels();
+const { Conversation, Message, User } = defineModels();
 
 const sendMessage = async (req, res) => {
 
@@ -9,7 +9,7 @@ const sendMessage = async (req, res) => {
 
         const ConversationId = req.params.id
 
-        const { SenderId, content } = req.body
+        const { SenderId, content, Sender } = req.body
 
         const conversationExist = await Conversation.findOne({
             where: { id: ConversationId }
@@ -22,7 +22,8 @@ const sendMessage = async (req, res) => {
         const newMessage = await Message.create({
             ConversationId,
             SenderId,
-            content
+            content,
+            Sender
         })
 
         res.status(200).json(newMessage);
@@ -41,6 +42,7 @@ const getAllMessages = async (req, res) => {
             where: { ConversationId: conversationId },//se filtran los mensajes por ID de conversación
             order: [['createdAt', 'DESC']], // Ordenamos los mensajes por fecha de creación en orden descendente (para obtener los últimos primeros)
             limit: 40, // Limitamos la consulta a los últimos 20 mensajes
+            
         })
 
         if (messages.length < 1) {

@@ -10,12 +10,13 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
-createConnections(app);
+
+const server = createConnections(app);
 apiV1Routes(app)
 app.get('/', async (req, res) => {
    res.json({message: 'hola mundo'})
 })
 
-app.listen(8000, () => {
+server.listen(8000, () => {
     console.log('listening on port 8000')
 });

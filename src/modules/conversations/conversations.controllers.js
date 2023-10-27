@@ -1,88 +1,128 @@
-import { Sequelize } from "sequelize";
 import defineModels from "../../models/index.js";
 
 const { Conversation, Participant, User, Message } = defineModels()
 
 const getAllConversations = async (req, res) => {
-
   try {
-    const userId = req.params.id;
-    const conversations = await Conversation.findAll({
-      include: [
-        {
+    const UserId = req.params.id;
+    const conversations = await Participant.findAll({
+      where: { UserId },
+      attributes: [],
+      include: {
+        model: Conversation,
+        include: {
           model: Participant,
-          where: { UserId: userId },
-        },
-        {
-          model: User, // Relación con el creador de la conversación
-          as: 'User',
-          attributes: ['username'],
-        },
-      ],
+          attributes: ['UserId'],
+          include: {
+            model: User,
+            attributes: ['username']
+          }
+        }
+      }
     });
-    
-  
 
     if (conversations.length < 1) {
-      return res.json('no existen conversaciones para este usuario')
+      return res.status(200).json({ message: 'No existen conversaciones para este usuario' });
+    } else {
+
+      return res.status(200).json(conversations);
     }
-
-    res.status(200).json(conversations);
-
   } catch (error) {
-
+    console.error(error);
     res.status(500).json({ error: 'Error al obtener las conversaciones del usuario' });
   }
 };
 
+
+
 const createConversationWithParticipants = async (req, res) => {
-
   try {
-
     const { title, participantIds } = req.body;
 
-    if (!Array.isArray(participantIds)) {
-      return res.status(400).json({ error: 'La lista de participantes debe ser un arreglo.' });
-    }
-
-    // Eliminar duplicados del arreglo de participantes
+    // Elimina duplicados
     const uniqueParticipantIds = [...new Set(participantIds)];
-
-    if (uniqueParticipantIds.length < 2) {
-      return res.status(400).json({ error: 'Debe haber al menos dos participantes en la conversación.' });
-    }
-
     const orderParticipants = uniqueParticipantIds.sort((a, b) => a - b);
 
-    const conversationsExist = await Conversation.findOne({
-      include: [
-        {
-          model: Participant,
-          where: { UserId: orderParticipants },
-          group: ['Conversation.id'],
-          having: Sequelize.where(
-            Sequelize.fn('count', Sequelize.col('Participants.UserId')),
-            orderParticipants.length
-          ),
-        },
-      ],
+    const exist = await Conversation.findOne({
+      where:{title: 'General'},
+      include:[{model:Participant}]
     });
 
-    if (conversationsExist) {
-      return res.status(400).json(conversationsExist);
-    }
-    const newConversation = await Conversation.create({ title });
-    for (const userId of participantIds) {
-      await Participant.create({ UserId: userId, ConversationId: newConversation.id });
+    if(exist){
+
+      const participantsGeneral = exist.Participants.map(participant => participant.UserId);
+
+      const newParticipants = orderParticipants.filter(participant => !participantsGeneral.includes(participant));
+
+      if(newParticipants.length > 0){
+
+        await Promise.all(
+          newParticipants.map(async idParticipant => await Participant.create(
+            {
+              UserId: idParticipant,
+              ConversationId: exist.id
+            }
+          ))
+        );
+      }
+
+      const updateExist = await Conversation.findOne({
+        where:{title: 'General'},
+        include:[{model:Participant}]
+      })
+
+      return res.status(200).json(updateExist)
     }
 
-    res.status(201).json({ message: 'Conversación creada y participantes agregados' });
+    const conversation = await Conversation.create({ title });
 
+    // Se agregan los participantes
+    await Promise.all(orderParticipants.map(async (participant) => {
+      await Participant.create({
+        UserId: participant,
+        ConversationId: conversation.id,
+      });
+    }));
+
+    const conversationWithParticipants = await Conversation.findByPk(conversation.id, {
+      include: [
+        {
+          model: Participant
+        }
+      ]
+    });
+
+    const addConversa = [
+      {
+      Conversation: conversationWithParticipants
+      }
+  ]
+    // Retorna la conversación con los participantes
+    res.status(200).json(addConversa);
   } catch (error) {
-
+    console.error(error);
     res.status(500).json({ error: 'Error al crear la conversación' });
   }
 };
+
+
+const createPrivateConversation = async (req, res) => {
+
+  try {
+    const { usersId } = req.body
+    console.log(usersId)
+    const Chanel = await Conversation.create({ title: 'private' });
+
+    const participants = await usersId.map(user => Participant.create({
+      UserId: user,
+      ConversationId: Chanel.id
+    }));
+
+    res.status(200).json(Chanel);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al crear la conversación' });
+  }
+}
 
 const deleteConversation = async (req, res) => {
 
@@ -119,5 +159,6 @@ const deleteConversation = async (req, res) => {
 export {
   getAllConversations,
   createConversationWithParticipants,
+  createPrivateConversation,
   deleteConversation
 }
