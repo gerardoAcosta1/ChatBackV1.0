@@ -111,6 +111,7 @@ const createPrivateConversation = async (req, res) => {
   try {
     const { usersId } = req.body
     console.log(usersId)
+
     const Chanel = await Conversation.create({ title: 'private' });
 
     const participants = await usersId.map(user => Participant.create({

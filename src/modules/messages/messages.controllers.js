@@ -18,7 +18,7 @@ const sendMessage = async (req, res) => {
         if (!conversationExist) {
             return res.json('la conversación no existe')
         }
-
+        
         const newMessage = await Message.create({
             ConversationId,
             SenderId,

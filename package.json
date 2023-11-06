@@ -23,7 +23,9 @@
     "pg": "^8.11.3",
     "pg-hstore": "^2.3.4",
     "sequelize": "^6.33.0",
-    "socket.io": "^4.7.2"
+    "simple-peer": "^9.11.1",
+    "socket.io": "^4.7.2",
+    "wrtc": "^0.4.7"
   },
   "devDependencies": {
     "dotenv": "^16.3.1",
